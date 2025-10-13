@@ -90,7 +90,6 @@ docs/_build/
 *.backup
 
 # Development files
-requirements_pinned.txt
-# Temporary test files (but keep actual test suite)
+# Temporary test files
 temp_test_*.py
 scratch/

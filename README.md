@@ -1,23 +1,18 @@
-# 🔍 Multimodal Document Search Engine
+# Multimodal Document Search Engine
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/streamlit-1.39.0-red.svg)](https://streamlit.io/)
-[![CLIP](https://img.shields.io/badge/model-CLIP--ViT--Large-green.svg)](https://huggingface.co/openai/clip-vit-large-patch14)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A multimodal search engine that transforms your document collections into searchable vector embeddings using OpenAI's CLIP model. The system extracts and processes both textual content and images from PDF documents, converting them into high-dimensional vector representations that enable semantic search across modalities. Users can query using natural language to find relevant text passages or images, with the search powered by cosine similarity calculations between query embeddings and document embeddings. This approach enables cross-modal search capabilities where text queries can retrieve relevant images and vice versa, all through unified vector space representation.
 
-A powerful multimodal search engine that enables natural language querying across both text content and images within your document collection. Built with OpenAI's CLIP model for state-of-the-art cross-modal understanding.
+## Key Features
 
-## ✨ Key Features
+- **Cross-Modal Search**: Find images using text queries and vice versa
+- **Intelligent Document Processing**: Automatic text extraction and image filtering
+- **Advanced Search**: Keyword relevance boosting + semantic similarity
+- **Modern UI**: Clean, responsive interface with real-time search
+- **Performance Optimized**: Model caching, efficient similarity search
+- **Configurable**: Easy model and parameter customization
+- **User Friendly**: Intuitive controls with helpful guidance
 
-- 🔍 **Cross-Modal Search**: Find images using text queries and vice versa
-- 📄 **Intelligent Document Processing**: Automatic text extraction and image filtering
-- 🎯 **Advanced Search**: Keyword relevance boosting + semantic similarity
-- 🎨 **Modern UI**: Clean, responsive interface with real-time search
-- ⚡ **Performance Optimized**: Model caching, efficient similarity search
-- 🔧 **Configurable**: Easy model and parameter customization
-- 📱 **User Friendly**: Intuitive controls with helpful guidance
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8 or higher
@@ -63,27 +58,24 @@ streamlit run main.py
 
 4. **Start searching**: Open your browser and start querying your documents!
 
-## 📁 Project Structure
+## Project Structure
 ```
 multimodal_document_search/
-├── 📁 source_documents/     # Place your PDF documents here
+├── source_documents/        # Place your PDF documents here
 │   ├── attention.pdf        # Sample: Attention mechanism paper
 │   └── example.pdf          # Your documents go here
-├── 📁 data/                 # Generated data (auto-created)
+├── data/                    # Generated data (auto-created)
 │   ├── images/              # Extracted images
 │   └── multimodal_data.csv  # Processed embeddings
-├── 🐍 main.py               # Streamlit web application
-├── 🔧 data_preprocessor.py  # Document processing pipeline
-├── 🛠️ utils.py              # Core search and embedding functions
-├── ⚙️ config.py             # Configuration management
-├── 📋 requirements.txt      # Python dependencies
-├── 📝 CHANGELOG.md          # Version history
-├── 🚫 .gitignore           # Git ignore rules
-├── 🔒 .python-version      # Python version specification
-└── 📖 README.md            # This documentation
+├── main.py                  # Streamlit web application
+├── data_preprocessor.py     # Document processing pipeline
+├── utils.py                 # Core search and embedding functions
+├── config.py                # Configuration management
+├── requirements.txt         # Python dependencies
+└── README.md               # This documentation
 ```
 
-## 🔧 Configuration
+## Configuration
 
 The system is highly configurable through `config.py`. Key settings include:
 
@@ -104,15 +96,7 @@ MIN_IMAGE_WIDTH = 280           # Filter small images
 KEYWORD_BOOST_WEIGHT = 0.3      # Search relevance tuning
 ```
 
-### Environment Variables
-Override settings without code changes:
-```bash
-export CLIP_MODEL_NAME="openai/clip-vit-base-patch32"
-export DEFAULT_TOP_N=15
-export MAX_TEXT_LENGTH=15000
-```
-
-## 🎯 How It Works
+## How It Works
 
 ### 1. Document Processing
 - **Text Extraction**: PyMuPDF extracts text from PDFs page by page
@@ -132,19 +116,12 @@ export MAX_TEXT_LENGTH=15000
 - **Performance Optimization**: Model caching, efficient vector operations
 - **Error Resilience**: Graceful handling of missing files, corrupt data
 
-## 📊 Performance & Scalability
+## Performance & Scalability
 
 ### Model Performance
 - **CLIP ViT-Large**: State-of-the-art multimodal understanding
 - **Memory Usage**: ~2GB RAM for model, ~500MB for typical document set
 - **Speed**: ~1-2 seconds per query after initial model load
-
-### Scaling Considerations
-- **Documents**: Tested with 100+ PDFs, hundreds of pages
-- **Images**: Handles thousands of images with intelligent filtering
-- **Search Speed**: Sub-second response for datasets up to 10k embeddings
-
-## 🛠️ Development Setup
 
 ### For Contributors
 
@@ -154,24 +131,14 @@ git clone https://github.com/your-username/multimodal_document_search.git
 cd multimodal_document_search
 ```
 
-2. **Install development dependencies**:
+2. **Create virtual environment and install dependencies**:
 ```bash
+python -m venv .venv
+.venv\Scripts\activate  # On Windows
 pip install -r requirements.txt
-# For development, also install:
-pip install pytest black flake8
 ```
 
-3. **Run tests** (when available):
-```bash
-python -m pytest tests/
-```
-
-### Code Quality
-- Follow PEP 8 style guidelines
-- Use meaningful variable names and docstrings
-- Test changes with sample documents before committing
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -200,7 +167,8 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 - **High memory usage**: Switch to base CLIP model
 - **Long preprocessing**: Filter documents, use smaller images
 
-## 📚 Documentation
+
+## Documentation
 
 ### API Reference
 - **`utils.py`**: Core embedding and search functions
@@ -212,73 +180,36 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 Try these sample searches to get started:
 - *"transformer architecture attention mechanism"*
 - *"neural network diagram"*
-- *"financial performance charts"*
-- *"mathematical equations and formulas"*
+- *"Tesla ecosystem"*
+- *"Vector databases"*
 
-## 🎥 Demo
+## Demo
 
 A recorded demonstration of the application is available:
-[📹 Watch Demo Video](https://drive.google.com/file/d/18rTaSKrvuOD1cN1nj-nqvim1PKla2s7V/view?usp=drive_link)
+[Watch Demo Video](https://drive.google.com/file/d/18rTaSKrvuOD1cN1nj-nqvim1PKla2s7V/view?usp=drive_link)
 
-## 📈 Roadmap
 
-### Upcoming Features
-- [ ] Support for additional document formats (Word, PowerPoint)
-- [ ] Advanced filtering options (date, author, document type)
-- [ ] Batch query processing
-- [ ] Integration with cloud storage (S3, Google Drive)
-- [ ] Multi-language support
-- [ ] Advanced analytics and search insights
-
-### Performance Improvements
-- [ ] GPU acceleration support
-- [ ] Distributed processing for large document sets
-- [ ] Incremental embedding updates
-- [ ] Vector database integration (Pinecone, Weaviate)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our contributing guidelines:
-
-1. **Fork the repository** and create a feature branch
-2. **Make your changes** with proper testing
-3. **Follow code style** guidelines (PEP 8, meaningful names)
-4. **Update documentation** as needed
-5. **Submit a pull request** with clear description
-
-### Development Workflow
-```bash
-# Create feature branch
-git checkout -b feature/your-feature-name
-
-# Make changes and commit
-git commit -m "Add: your feature description"
-
-# Push and create pull request
-git push origin feature/your-feature-name
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **OpenAI** for the CLIP model and architecture
 - **Hugging Face** for model hosting and transformers library
 - **Streamlit** for the excellent web framework
 - **PyMuPDF** for robust PDF processing capabilities
 
-## 📞 Support
+## Roadmap
+### Upcoming Features
+- [ ] Support for additional document formats (Word, PowerPoint)
+- [ ] Advanced filtering options (date, author, document type)
+- [ ] Batch query processing
+- [ ] Integration with cloud storage (S3, Google Drive)
+- [ ] Multi-language support
 
-- **Issues**: [GitHub Issues](https://github.com/ShafqaatMalik/multimodal_document_search/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ShafqaatMalik/multimodal_document_search/discussions)
-- **Email**: [Your contact email if desired]
+### Performance Improvements
+- [ ] GPU acceleration support
+- [ ] Distributed processing for large document sets
+- [ ] Vector database integration (Pinecone, Weaviate)
 
-## ⭐ Star History
+
 
 If you find this project useful, please consider giving it a star! It helps others discover the project.
 
----
-
-**Built with ❤️ for the AI and document processing community**
