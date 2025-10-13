@@ -1,0 +1,19 @@
+# Multimodal Document Search Engine Dependencies
+# Core ML and Data Processing
+torch==2.4.1
+transformers==4.46.0
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+
+# Image Processing
+Pillow==10.4.0
+
+# Web Interface
+streamlit==1.39.0
+
+# Document Processing
+PyMuPDF==1.24.10
+
+# Utilities
+tqdm==4.66.5

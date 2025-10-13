@@ -1,0 +1,96 @@
+# Multimodal Document Search - .gitignore
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Virtual Environments ---
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- Project Specific ---
+# Large model files (downloaded automatically)
+models/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Data files (except sample data)
+data/images/*.png
+data/images/*.jpg
+data/images/*.jpeg
+data/multimodal_data.csv
+source_documents/*.pdf
+
+# Logs and temporary files
+logs/
+*.log
+temp/
+tmp/
+
+# Environment variables
+.env.local
+.env.production
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation builds
+docs/_build/
+
+# Backup files
+*.bak
+*.backup
+
+# Development files
+requirements_pinned.txt
+# Temporary test files (but keep actual test suite)
+temp_test_*.py
+scratch/
