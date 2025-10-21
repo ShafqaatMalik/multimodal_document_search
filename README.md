@@ -171,7 +171,7 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 ## Documentation
 
-### API Reference
+### Code Structure
 - **`utils.py`**: Core embedding and search functions
 - **`config.py`**: Configuration management and environment variables
 - **`data_preprocessor.py`**: Document processing pipeline
