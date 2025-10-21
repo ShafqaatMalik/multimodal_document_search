@@ -190,27 +190,3 @@ A recorded demonstration of the application is available:
 [Watch Demo Video](https://drive.google.com/file/d/18rTaSKrvuOD1cN1nj-nqvim1PKla2s7V/view?usp=drive_link)
 
 
-## Acknowledgments
-
-- **OpenAI** for the CLIP model and architecture
-- **Hugging Face** for model hosting and transformers library
-- **Streamlit** for the excellent web framework
-- **PyMuPDF** for robust PDF processing capabilities
-
-## Roadmap
-### Upcoming Features
-- [ ] Support for additional document formats (Word, PowerPoint)
-- [ ] Advanced filtering options (date, author, document type)
-- [ ] Batch query processing
-- [ ] Integration with cloud storage (S3, Google Drive)
-- [ ] Multi-language support
-
-### Performance Improvements
-- [ ] GPU acceleration support
-- [ ] Distributed processing for large document sets
-- [ ] Vector database integration (Pinecone, Weaviate)
-
-
-
-If you find this project useful, please consider giving it a star! It helps others discover the project.
-
