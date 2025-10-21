@@ -62,7 +62,8 @@ data/images/*.png
 data/images/*.jpg
 data/images/*.jpeg
 data/multimodal_data.csv
-source_documents/*.pdf
+# Uncommented to include PDFs in source_documents
+# source_documents/*.pdf
 
 # Logs and temporary files
 logs/
