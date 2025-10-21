@@ -43,7 +43,7 @@ pip install -r requirements.txt
 
 ### Usage
 
-1. **Add your documents**: Place PDF files in the `source_documents/` directory
+1. **Use included documents or add your own**: The repository comes with sample PDF files in the `source_documents/` directory. You can add more PDF files there if needed.
 
 2. **Process documents** (first time only):
 ```bash
@@ -61,9 +61,10 @@ streamlit run main.py
 ## Project Structure
 ```
 multimodal_document_search/
-├── source_documents/        # Place your PDF documents here
+├── source_documents/        # PDF documents included in the repository
 │   ├── attention.pdf        # Sample: Attention mechanism paper
-│   └── example.pdf          # Your documents go here
+│   ├── TSLA-Q2-2025-Update.pdf  # Tesla quarterly update sample
+│   └── whitepaper_emebddings_vectorstores_v2.pdf  # Embeddings whitepaper
 ├── data/                    # Generated data (auto-created)
 │   ├── images/              # Extracted images
 │   └── multimodal_data.csv  # Processed embeddings
@@ -177,11 +178,11 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 - **`main.py`**: Streamlit web application
 
 ### Example Queries
-Try these sample searches to get started:
-- *"transformer architecture attention mechanism"*
-- *"neural network diagram"*
-- *"Tesla ecosystem"*
-- *"Vector databases"*
+Try these sample searches with the included documents:
+- *"transformer architecture attention mechanism"* (attention.pdf)
+- *"vector embeddings and databases"* (whitepaper_emebddings_vectorstores_v2.pdf)
+- *"Tesla financial performance"* (TSLA-Q2-2025-Update.pdf)
+- *"energy production and storage"* (TSLA-Q2-2025-Update.pdf)
 
 ## Demo
 
