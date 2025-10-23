@@ -13,12 +13,12 @@ import hashlib
 import fitz  # PyMuPDF
 import pandas as pd
 from tqdm import tqdm
+from logger import get_logger
 
-# Support running as script or module
-try:
-    from utils import get_text_embedding, get_image_embedding
-except ImportError:
-    from .utils import get_text_embedding, get_image_embedding
+# Initialize logger
+logger = get_logger(__name__)
+
+from utils import get_text_embedding, get_image_embedding
 
 # --- Configuration ---
 from config import get_config, TEXT_CHUNK_SIZE, TEXT_CHUNK_OVERLAP
@@ -45,19 +45,28 @@ def process_documents():
     """
     all_data = []
     doc_files = [f for f in os.listdir(SOURCE_DOCS_DIR) if f.endswith(".pdf")]
+    
+    logger.info(f"Starting document processing for {len(doc_files)} PDF files")
+    logger.info(f"Output directory: {OUTPUT_DATA_DIR}")
+    logger.info(f"Images directory: {IMAGES_DIR}")
 
     for doc_name in doc_files:
         doc_path = os.path.join(SOURCE_DOCS_DIR, doc_name)
-        print(f"Processing document: {doc_name}...")
+        logger.info(f"Processing document: {doc_name}...")
         doc = fitz.open(doc_path)
         
         seen_hashes = set() if DEDUPLICATE_IMAGES else None
         kept, skip_small, skip_square, skip_dup = 0, 0, 0, 0
+        logger.debug(f"Document has {len(doc)} pages")
 
         # --- Process Text ---
+        text_chunk_count = 0
         for page_num, page in enumerate(tqdm(doc, desc=f"Pages in {doc_name}")):
             text = page.get_text()
             text_chunks = chunk_text(text)
+            
+            logger.debug(f"Page {page_num+1}: {len(text_chunks)} text chunks")
+            
             for chunk in text_chunks:
                 if not chunk.strip():
                     continue
@@ -70,7 +79,8 @@ def process_documents():
                     "page": page_num + 1,
                     "caption": ""
                 })
-
+                text_chunk_count += 1
+        
             # --- Process Images ---
             image_list = page.get_images(full=True)
             for img_index, img in enumerate(image_list):
@@ -121,13 +131,19 @@ def process_documents():
                         "caption": f"Image {img_index + 1} from page {page_num + 1}" # Placeholder caption
                     })
                     kept += 1
+        logger.info(f"  ✓ Kept {kept} images | Filtered: {skip_small} small, {skip_square} square-icons, {skip_dup} duplicates")
         
-        print(f"  ✓ Kept {kept} images | Filtered: {skip_small} small, {skip_square} square-icons, {skip_dup} duplicates")
+        # Add a log message for the completed document
+        logger.info(f"Completed processing document: {doc_name}")
 
     # --- Save to CSV ---
     df = pd.DataFrame(all_data)
     df.to_csv(OUTPUT_CSV_PATH, index=False)
-    print(f"\nPreprocessing complete. Data saved to {OUTPUT_CSV_PATH}")
+    
+    text_count = len(df[df["modality"] == "text"])
+    image_count = len(df[df["modality"] == "image"])
+    logger.info(f"\nPreprocessing complete. Data saved to {OUTPUT_CSV_PATH}")
+    logger.info(f"Summary: {text_count} text chunks, {image_count} images from {len(doc_files)} documents")
 
 if __name__ == "__main__":
     process_documents()

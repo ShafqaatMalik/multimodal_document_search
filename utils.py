@@ -11,6 +11,10 @@ import re  # Added for regex pattern matching
 from transformers import CLIPProcessor, CLIPModel
 from PIL import Image
 from sklearn.metrics.pairwise import cosine_similarity
+from logger import get_logger, timeit
+
+# Initialize logger
+logger = get_logger(__name__)
 
 # --- Load CLIP Model ---
 # Using a singleton pattern to ensure the model is loaded only once for better performance
@@ -30,10 +34,10 @@ def get_clip_model():
     """
     global model, processor
     if model is None:
-        print("🔄 Loading CLIP model... (This may take a moment on first run)")
+        logger.info("Loading CLIP model... (This may take a moment on first run)")
         model = CLIPModel.from_pretrained(MODEL_NAME)
         processor = CLIPProcessor.from_pretrained(MODEL_NAME)
-        print("✅ CLIP model loaded successfully!")
+        logger.info("CLIP model loaded successfully!")
     return model, processor
 
 # --- Data Loading ---
@@ -44,32 +48,32 @@ def load_data(filepath):
     """
     try:
         df = pd.read_csv(filepath)
-        print(f"📊 Loaded {len(df)} entries from {filepath}")
+        logger.info(f"Loaded {len(df)} entries from {filepath}")
         
-        # Handle different embedding formats
         if "embedding" in df.columns:
-            # Convert string representation of list back to numpy array
             df["embedding"] = df["embedding"].apply(parse_embedding)
-            print("✅ Successfully parsed embeddings")
-        elif any(col.startswith(('text_emb_', 'image_emb_')) for col in df.columns):
-            # Handle embedding path references (future compatibility)
-            print("⚠️ Warning: Found embedding path columns. Using placeholder embeddings.")
-            df["embedding"] = df.apply(lambda row: np.random.rand(768), axis=1)
+            logger.info("Successfully parsed embeddings")
         else:
-            raise ValueError("❌ No embedding columns found in data file")
+            logger.error("No embedding columns found in data file")
+            raise ValueError("No embedding columns found in data file")
         
-        # Print data statistics
+        # Resource usage logging
         text_count = len(df[df["modality"] == "text"])
         image_count = len(df[df["modality"] == "image"])
-        print(f"📝 Text entries: {text_count} | 🖼️ Image entries: {image_count}")
+        total_size = df.memory_usage(deep=True).sum() / 1024 / 1024  # MB
+        
+        logger.info(f"RESOURCE_USAGE - Total entries: {len(df)}")
+        logger.info(f"RESOURCE_USAGE - Text entries: {text_count}")
+        logger.info(f"RESOURCE_USAGE - Image entries: {image_count}")
+        logger.info(f"RESOURCE_USAGE - Memory usage: {total_size:.2f} MB")
         
         return df
     except FileNotFoundError:
-        print(f"❌ Error: File {filepath} not found!")
-        print("💡 Please run 'python data_preprocessor.py' first to generate the data file.")
+        logger.error(f"File {filepath} not found!")
+        logger.info("Please run 'python data_preprocessor.py' first to generate the data file.")
         raise
     except Exception as e:
-        print(f"❌ Error loading data: {str(e)}")
+        logger.error(f"Error loading data: {str(e)}")
         raise
 
 def parse_embedding(embedding_str):
@@ -88,20 +92,20 @@ def parse_embedding(embedding_str):
                 if clean_str:
                     parsed = np.fromstring(clean_str, sep=",")
                     if len(parsed) == 0:
-                        print("⚠️ Warning: Could not parse embedding string, using zero vector")
+                        logger.warning("Could not parse embedding string, using zero vector")
                         return np.zeros(EMBEDDING_DIM)
                     return parsed
                 else:
-                    print("⚠️ Warning: Empty embedding string, using zero vector")
+                    logger.warning("Empty embedding string, using zero vector")
                     return np.zeros(EMBEDDING_DIM)
         elif isinstance(embedding_str, (list, np.ndarray)):
             # Already in proper format
             return np.array(embedding_str)
         else:
-            print(f"⚠️ Warning: Unknown embedding format {type(embedding_str)}, using zero vector")
+            logger.warning(f"Unknown embedding format {type(embedding_str)}, using zero vector")
             return np.zeros(EMBEDDING_DIM)
     except Exception as e:
-        print(f"⚠️ Warning: Error parsing embedding ({str(e)}), using zero vector")
+        logger.warning(f"Error parsing embedding ({str(e)}), using zero vector")
         return np.zeros(EMBEDDING_DIM)
 
 # --- Embedding Generation ---
@@ -111,9 +115,9 @@ def get_text_embedding(text):
     Enhanced with input validation and error handling.
     """
     if not text or not isinstance(text, str) or not text.strip():
-        print("⚠️ Warning: Empty or invalid text input, using zero vector")
+        logger.warning("Empty or invalid text input, using zero vector")
         return np.zeros(EMBEDDING_DIM)  # CLIP embeddings dimension from config
-        
+    
     try:
         model, processor = get_clip_model()
         
@@ -121,14 +125,15 @@ def get_text_embedding(text):
         max_length = config["max_text_length"]
         if len(text) > max_length:
             text = text[:max_length]
-            print(f"⚠️ Warning: Text truncated to {max_length:,} characters for performance")
+            logger.warning(f"Text truncated to {max_length:,} characters for performance")
             
         inputs = processor(text=text, return_tensors="pt", padding=True, truncation=True)
         with torch.no_grad():
             text_features = model.get_text_features(**inputs)
+        
         return text_features.cpu().numpy().flatten()
     except Exception as e:
-        print(f"❌ Error generating text embedding: {str(e)}")
+        logger.error(f"Error generating text embedding: {str(e)}")
         return np.zeros(EMBEDDING_DIM)
 
 def get_image_embedding(image_path):
@@ -137,14 +142,14 @@ def get_image_embedding(image_path):
     Enhanced with robust error handling for various image formats and missing files.
     """
     if not image_path or not isinstance(image_path, str):
-        print("⚠️ Warning: Invalid image path")
+        logger.warning("Invalid image path")
         return np.zeros(EMBEDDING_DIM)
         
     # Handle placeholder URLs (common in documents with referenced images)
     if (image_path.startswith(('http://', 'https://')) or 
         image_path.startswith('placeholder_') or
         not image_path.strip()):
-        print(f"⚠️ Warning: Placeholder or URL detected: {image_path[:50]}...")
+        logger.warning(f"Placeholder or URL detected: {image_path[:50]}...")
         return np.zeros(EMBEDDING_DIM)
     
     try:
@@ -152,16 +157,17 @@ def get_image_embedding(image_path):
         
         # Check if file exists
         if not os.path.exists(image_path):
-            print(f"⚠️ Warning: Image file not found: {image_path}")
+            logger.warning(f"Image file not found: {image_path}")
             return np.zeros(EMBEDDING_DIM)
             
         image = Image.open(image_path).convert("RGB")
         inputs = processor(images=image, return_tensors="pt")
         with torch.no_grad():
             image_features = model.get_image_features(**inputs)
+        
         return image_features.cpu().numpy().flatten()
     except Exception as e:
-        print(f"❌ Error processing image {image_path}: {str(e)}")
+        logger.error(f"Error processing image {image_path}: {str(e)}")
         return np.zeros(EMBEDDING_DIM)
 
 # --- Improved Search and Similarity ---
@@ -262,14 +268,14 @@ def find_similar_texts(query_embedding, text_df, top_n=5, query_text=None):
     Enhanced with keyword relevance boosting for better semantic search.
     """
     if text_df.empty:
-        print("⚠️ Warning: No text data available for search")
+        logger.warning("No text data available for search")
         return []
         
     try:
-        # Extract keywords for relevance boosting if query text is provided
         keywords = []
         if query_text and isinstance(query_text, str):
             keywords = extract_query_keywords(query_text)
+            logger.debug(f"Extracted keywords: {keywords}")
         
         # Calculate vector similarity
         text_embeddings = np.vstack(text_df["embedding"].values)
@@ -283,8 +289,10 @@ def find_similar_texts(query_embedding, text_df, top_n=5, query_text=None):
             
             # Combine scores (weighted average: 70% cosine similarity, 30% keyword relevance)
             combined_scores = 0.7 * cosine_scores + 0.3 * np.array(relevance_scores)
+            logger.debug(f"Applied keyword boosting with {len(keywords)} keywords")
         else:
             combined_scores = cosine_scores
+            logger.debug("No keywords extracted, using pure semantic similarity")
 
         # Get the top N results
         top_indices = combined_scores.argsort()[-top_n:][::-1]
@@ -300,6 +308,7 @@ def find_similar_texts(query_embedding, text_df, top_n=5, query_text=None):
                 content.lower() == "n/a"
             ):
                 content = "[Placeholder text content]"
+                logger.debug(f"Replaced empty/placeholder content at index {i}")
                 
             results.append(
                 {
@@ -307,14 +316,15 @@ def find_similar_texts(query_embedding, text_df, top_n=5, query_text=None):
                     "content": content,
                     "source_doc": text_df.iloc[i]["source_doc"],
                     "page": text_df.iloc[i]["page"],
-                    "similarity": float(combined_scores[i]),  # Convert to float for JSON serialization
+                    "similarity": float(combined_scores[i]),
                 }
             )
         
-        print(f"🔍 Found {len(results)} similar text results")
+        logger.info(f"Found {len(results)} similar text results")
+        logger.debug(f"Top similarity score: {results[0]['similarity'] if results else 'N/A'}")
         return results
     except Exception as e:
-        print(f"❌ Error in text search: {str(e)}")
+        logger.error(f"Error in text search: {str(e)}")
         return []
 
 def find_similar_images(query_embedding, image_df, top_n=5):
@@ -323,10 +333,11 @@ def find_similar_images(query_embedding, image_df, top_n=5):
     Enhanced with error handling and support for placeholder images.
     """
     if image_df.empty:
-        print("⚠️ Warning: No image data available for search")
+        logger.warning("No image data available for search")
         return []
         
     try:
+        # Calculate vector similarity
         image_embeddings = np.vstack(image_df["embedding"].values)
         similarities = cosine_similarity([query_embedding], image_embeddings)[0]
 
@@ -334,6 +345,7 @@ def find_similar_images(query_embedding, image_df, top_n=5):
         top_indices = similarities.argsort()[-top_n:][::-1]
 
         results = []
+        placeholder_count = 0
         for i in top_indices:
             content = image_df.iloc[i]["content"]
             
@@ -344,10 +356,13 @@ def find_similar_images(query_embedding, image_df, top_n=5):
                 not content.strip()
             ))
             
+            if is_placeholder:
+                placeholder_count += 1
+            
             results.append(
                 {
                     "modality": "image",
-                    "content": content,  # Keep original content for processing
+                    "content": content,
                     "is_placeholder": is_placeholder,
                     "source_doc": image_df.iloc[i]["source_doc"],
                     "page": image_df.iloc[i]["page"],
@@ -356,8 +371,10 @@ def find_similar_images(query_embedding, image_df, top_n=5):
                 }
             )
         
-        print(f"🔍 Found {len(results)} similar image results")
+        logger.info(f"Found {len(results)} similar image results ({placeholder_count} placeholders)")
+        if results:
+            logger.debug(f"Top image similarity score: {results[0]['similarity']}")
         return results
     except Exception as e:
-        print(f"❌ Error in image search: {str(e)}")
+        logger.error(f"Error in image search: {str(e)}")
         return []
